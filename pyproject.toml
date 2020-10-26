@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "torchmtl"
+version = "0.1.0"
+description = "A lightweight module for Multi-Task Learning in pytorch"
+authors = ["Christian Bock <christian.bock@bsse.ethz.ch>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+torch = "^1.6.0"
+networkx = "^2.5"
+matplotlib = "^3.3.2"
+scipy = "^1.5.3"
+
+[tool.poetry.dev-dependencies]
+jupyter = "^1.0.0"
+notebook = "^6.1.4"
+tqdm = "^4.51.0"
+pytest = "^6.1.1"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
