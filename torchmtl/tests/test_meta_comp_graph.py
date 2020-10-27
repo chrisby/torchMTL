@@ -12,65 +12,67 @@ from torch.nn import (Sequential, Linear, MSELoss)
 from torchmtl.model_builder import MTLModel
 from torchmtl.wrapping_layers import Concat
 
-complex_tasks = [
-    {
-        'name': "InputTask2",
-        'layers': Sequential(*[Linear(16, 32), Linear(32, 8)]),
-        'loss': MSELoss(),
-        'loss_weight': 1.0,
-        # No anchor_layer means this layer receives input directly
-    },    
-    {
-        'name': "InputTask1",
-        'layers': Sequential(*[Linear(16, 32), Linear(32, 8)]),
-        'loss_weight': 1.0
-        # No anchor_layer means this layer receives input directly
-    },
-    {
-        'name': "CombTask",
-        'layers': Concat(dim=1),
-        'loss_weight': 1.0,
-        'anchor_layer': ['InputTask1', 'InputTask2']
-    },
-    {
-        'name': "AuxTask1",
-        'layers': Sequential(*[Linear(16, 32), Linear(32, 1)]),
-        'loss': MSELoss(),
-        'loss_weight': 1.0,
-        'anchor_layer': 'CombTask'
-    },
-    {
-        'name': "MiddleTask1",
-        'layers': Sequential(*[Linear(16, 32), Linear(32, 8)]),
-        'loss': MSELoss(),
-        'loss_weight': 1.0,
-        'anchor_layer': 'CombTask'
-    },    
-    {
-        'name': "AuxTask2",
-        'layers': Sequential(*[Linear(8, 32), Linear(32, 1)]),
-        'loss': MSELoss(),
-        'loss_weight': 1.0,
-        'anchor_layer': 'MiddleTask1'
-    },
-    {
-        'name': "MiddleTask2",
-        'layers': Sequential(*[Linear(8, 32), Linear(32, 4)]),
-        'loss': MSELoss(),
-        'loss_weight': 1.0,
-        'anchor_layer': 'MiddleTask1'
-    },
-    {
-        'name': "AuxTask3",
-        'layers': Sequential(*[Linear(4, 32), Linear(32, 1)]),
-        'loss': MSELoss(),
-        'loss_weight': 1.0,
-        'anchor_layer': 'MiddleTask2'
-    }
-]
+@pytest.fixture
+def complex_tasks():
+    return [
+        {
+            'name': "InputTask2",
+            'layers': Sequential(*[Linear(16, 32), Linear(32, 8)]),
+            'loss': MSELoss(),
+            'loss_weight': 1.0,
+            # No anchor_layer means this layer receives input directly
+        },    
+        {
+            'name': "InputTask1",
+            'layers': Sequential(*[Linear(16, 32), Linear(32, 8)]),
+            'loss_weight': 1.0
+            # No anchor_layer means this layer receives input directly
+        },
+        {
+            'name': "CombTask",
+            'layers': Concat(dim=1),
+            'loss_weight': 1.0,
+            'anchor_layer': ['InputTask1', 'InputTask2']
+        },
+        {
+            'name': "AuxTask1",
+            'layers': Sequential(*[Linear(16, 32), Linear(32, 1)]),
+            'loss': MSELoss(),
+            'loss_weight': 1.0,
+            'anchor_layer': 'CombTask'
+        },
+        {
+            'name': "MiddleTask1",
+            'layers': Sequential(*[Linear(16, 32), Linear(32, 8)]),
+            'loss': MSELoss(),
+            'loss_weight': 1.0,
+            'anchor_layer': 'CombTask'
+        },    
+        {
+            'name': "AuxTask2",
+            'layers': Sequential(*[Linear(8, 32), Linear(32, 1)]),
+            'loss': MSELoss(),
+            'loss_weight': 1.0,
+            'anchor_layer': 'MiddleTask1'
+        },
+        {
+            'name': "MiddleTask2",
+            'layers': Sequential(*[Linear(8, 32), Linear(32, 4)]),
+            'loss': MSELoss(),
+            'loss_weight': 1.0,
+            'anchor_layer': 'MiddleTask1'
+        },
+        {
+            'name': "AuxTask3",
+            'layers': Sequential(*[Linear(4, 32), Linear(32, 1)]),
+            'loss': MSELoss(),
+            'loss_weight': 1.0,
+            'anchor_layer': 'MiddleTask2'
+        }
+    ]
 
 class TestGraphGeneration:
-    def test_complex_generation(self):
+    def test_complex_generation(self, complex_tasks):
 
         ground_truth_graph = nx.DiGraph()
         ground_truth_graph.add_nodes_from(['root', 'InputTask1', 'InputTask2',
@@ -86,12 +88,11 @@ class TestGraphGeneration:
                                            ('MiddleTask1', 'AuxTask2'),
                                            ('MiddleTask1', 'MiddleTask2'),
                                            ('MiddleTask2', 'AuxTask3')])
-
         model = MTLModel(complex_tasks, output_tasks=['AuxTask1', 'AuxTask2', 'AuxTask3'])
         assert is_isomorphic(model.g, ground_truth_graph)
 
 class TestGraphExecution:
-    def test_3_mse_tasks(self):
+    def test_3_mse_tasks(self, complex_tasks):
         model = MTLModel(complex_tasks, output_tasks=['AuxTask1', 'AuxTask2', 'AuxTask3'])
 
         sample_size = 16
