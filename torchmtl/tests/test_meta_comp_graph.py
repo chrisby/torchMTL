@@ -124,3 +124,36 @@ class TestGraphExecution:
         assert torch.isclose(preds[1], truths_2, atol=1.0).all()
         assert torch.isclose(preds[2], truths_3, atol=1.0).all()
 
+
+    def test_3_mse_tasks_2_losses(self, complex_tasks):
+        model = MTLModel(complex_tasks, output_tasks=['AuxTask1', 'AuxTask2', 'AuxTask3'])
+
+        sample_size = 16
+        torch.manual_seed(0)
+        X = torch.rand((sample_size, 16))
+        truths_1 = torch.ones(sample_size, 1) * 10.
+        truths_2 = torch.ones(sample_size, 1) * 20.
+        truths_3 = torch.ones(sample_size, 1) * 30.
+
+        mse = nn.MSELoss()
+        optimizer = optim.AdamW(model.parameters(), lr=0.01)
+        num_it = 1000
+
+        logging.getLogger().warning(f"Training 3 MSE losses for {num_it} iterations")
+        for i in range(num_it):
+            optimizer.zero_grad()
+
+            preds = model(X)
+
+            loss_1 = mse(truths_1, preds[0])
+            loss_3 = mse(truths_3, preds[2])
+
+            loss = loss_1 + loss_3
+            loss.backward()
+            optimizer.step()
+       
+        assert torch.isclose(preds[0], truths_1, atol=1.0).all()
+        assert not torch.isclose(preds[1], truths_2, atol=1.0).all()
+        assert torch.isclose(preds[2], truths_3, atol=1.0).all()
+
+
