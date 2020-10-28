@@ -9,6 +9,8 @@ from copy import copy # only used in logging.DEBUG mode
 LAYER_KEY = 'layers'
 NAME_KEY = 'name'
 ANCHOR_KEY = 'anchor_layer'
+LOSS_KEY = 'loss'
+LOSS_REG_KEY = 'loss_weight'
 
 class MTLModel(nn.Module):
     """
@@ -35,6 +37,11 @@ class MTLModel(nn.Module):
         self.g = nx.DiGraph()
         self.g.add_node('root')
         self._build_graph()
+
+        self.losses = {task[NAME_KEY]: task[LOSS_KEY] for task in task_layers if
+                      LOSS_KEY in task.keys()}
+        self.loss_weights = {task[NAME_KEY]: task[LOSS_REG_KEY] for task in
+                             task_layers if LOSS_REG_KEY in task.keys()}
 
     def _bfs_forward(self, start_node):
         ''' Here we iteratore through the graph in a BFS-fashion starting from
@@ -66,7 +73,16 @@ class MTLModel(nn.Module):
                     queue.append(i)
                     visited[i] = True
 
-        return [self.outputs[t] for t in self.output_tasks]
+        losses, loss_weights = self._get_losses() 
+        return [self.outputs[t] for t in self.output_tasks], losses, loss_weights
+
+    def _get_losses(self):
+        losses = []
+        loss_weights = []
+        for t in self.output_tasks:
+            losses.append(self.losses[t])
+            loss_weights.append(self.loss_weights[t])
+        return losses, loss_weights
 
     def forward(self, input):
         self.outputs = {'root': input}

@@ -18,7 +18,6 @@ def complex_tasks():
         {
             'name': "InputTask2",
             'layers': Sequential(*[Linear(16, 32), Linear(32, 8)]),
-            'loss': MSELoss(),
             'loss_weight': 1.0,
             # No anchor_layer means this layer receives input directly
         },    
@@ -31,7 +30,6 @@ def complex_tasks():
         {
             'name': "CombTask",
             'layers': Concat(dim=1),
-            'loss_weight': 1.0,
             'anchor_layer': ['InputTask1', 'InputTask2']
         },
         {
@@ -44,8 +42,6 @@ def complex_tasks():
         {
             'name': "MiddleTask1",
             'layers': Sequential(*[Linear(16, 32), Linear(32, 8)]),
-            'loss': MSELoss(),
-            'loss_weight': 1.0,
             'anchor_layer': 'CombTask'
         },    
         {
@@ -58,8 +54,6 @@ def complex_tasks():
         {
             'name': "MiddleTask2",
             'layers': Sequential(*[Linear(8, 32), Linear(32, 4)]),
-            'loss': MSELoss(),
-            'loss_weight': 1.0,
             'anchor_layer': 'MiddleTask1'
         },
         {
@@ -101,6 +95,7 @@ class TestGraphExecution:
         truths_1 = torch.ones(sample_size, 1) * 10.
         truths_2 = torch.ones(sample_size, 1) * 20.
         truths_3 = torch.ones(sample_size, 1) * 30.
+        y = [truths_1, truths_2, truths_3]
 
         mse = nn.MSELoss()
         optimizer = optim.AdamW(model.parameters(), lr=0.01)
@@ -109,20 +104,21 @@ class TestGraphExecution:
         logging.getLogger().warning(f"Training 3 MSE losses for {num_it} iterations")
         for i in range(num_it):
             optimizer.zero_grad()
+            y_hat, l_funcs, l_weights = model(X)
+    
+            loss = None
+            for i in range(len(y)):
+                if not loss:
+                    loss = l_weights[i] * l_funcs[i](y_hat[i], y[i])
+                else:
+                    loss += l_weights[i] * l_funcs[i](y_hat[i], y[i])
 
-            preds = model(X)
-
-            loss_1 = mse(truths_1, preds[0])
-            loss_2 = mse(truths_2, preds[1])
-            loss_3 = mse(truths_3, preds[2])
-
-            loss = loss_1 + loss_2 + loss_3
             loss.backward()
             optimizer.step()
        
-        assert torch.isclose(preds[0], truths_1, atol=1.0).all()
-        assert torch.isclose(preds[1], truths_2, atol=1.0).all()
-        assert torch.isclose(preds[2], truths_3, atol=1.0).all()
+        assert torch.isclose(y_hat[0], truths_1, atol=1.0).all()
+        assert torch.isclose(y_hat[1], truths_2, atol=1.0).all()
+        assert torch.isclose(y_hat[2], truths_3, atol=1.0).all()
 
 
     def test_3_mse_tasks_2_losses(self, complex_tasks):
@@ -143,17 +139,16 @@ class TestGraphExecution:
         for i in range(num_it):
             optimizer.zero_grad()
 
-            preds = model(X)
+            y_hat, l_funcs, l_weights = model(X)
+    
+            loss = l_weights[0] * l_funcs[0](y_hat[0], truths_1)
+            loss += l_weights[2] * l_funcs[2](y_hat[2], truths_3)
 
-            loss_1 = mse(truths_1, preds[0])
-            loss_3 = mse(truths_3, preds[2])
-
-            loss = loss_1 + loss_3
             loss.backward()
             optimizer.step()
        
-        assert torch.isclose(preds[0], truths_1, atol=1.0).all()
-        assert not torch.isclose(preds[1], truths_2, atol=1.0).all()
-        assert torch.isclose(preds[2], truths_3, atol=1.0).all()
+        assert torch.isclose(y_hat[0], truths_1, atol=1.0).all()
+        assert not torch.isclose(y_hat[1], truths_2, atol=1.0).all()
+        assert torch.isclose(y_hat[2], truths_3, atol=1.0).all()
 
 
