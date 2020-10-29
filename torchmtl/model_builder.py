@@ -2,6 +2,7 @@
 models."""
 import logging
 
+import torch
 from torch import nn
 import networkx as nx
 from copy import copy # only used in logging.DEBUG mode
@@ -11,6 +12,10 @@ NAME_KEY = 'name'
 ANCHOR_KEY = 'anchor_layer'
 LOSS_KEY = 'loss'
 LOSS_REG_KEY = 'loss_weight'
+AUTO_WEIGHT_KEY = 'auto'
+WEIGHT_INIT_KEY = 'loss_init_val'
+
+MISSING_WEIGHT_MSG = "Expect {0} for task {1} but none provided."
 
 class MTLModel(nn.Module):
     """
@@ -18,14 +23,24 @@ class MTLModel(nn.Module):
 
     Attributes
     ----------
-    name : type 
-        Description
+    g : networkx.Graph
+        The meta-computation graph
 
-    Methods
-    -------
-    bla()
-        Description
+    task_layers : list
+        A list which holds the layers for which to build the computation graph
 
+    output_tasks : list
+        A list which holds the tasks for which the output should be returned
+
+    layer_names : list
+        A list of the names of each layer
+
+    losses : dict
+        A dictionary which maps the name of a layer to its loss function
+
+    loss_weights : dict
+        A dictionary which maps the name of a layer to the weight of its loss
+        function
     """
 
     def __init__(self, task_layers, output_tasks):
@@ -34,14 +49,39 @@ class MTLModel(nn.Module):
         self.output_tasks = output_tasks
         self.layer_names = [t[NAME_KEY] for t in task_layers]
 
+        self._initialize_graph()
+
+        self._initialize_losses()
+        self._initialize_loss_weights()
+
+    def _initialize_losses(self):
+        self.losses = {task[NAME_KEY]: task[LOSS_KEY]\
+                       for task in self.task_layers if LOSS_KEY in task.keys()}
+
+    def _initialize_loss_weights(self):
+        self.loss_weights = {}
+        for task in self.task_layers:
+            self._set_loss_weight(task)
+
+    def _set_loss_weight(self, task):
+        task_name = task[NAME_KEY]
+        if LOSS_REG_KEY in task.keys():
+            if task[LOSS_REG_KEY] == AUTO_WEIGHT_KEY:
+                assert WEIGHT_INIT_KEY in task.keys(),\
+                        MISSING_WEIGHT_MSG.format(WEIGHT_INIT_KEY, task_name)
+                loss_weight = task[WEIGHT_INIT_KEY]
+                loss_name = f'{task_name}_loss'
+                loss_weight = torch.nn.Parameter(torch.full((1,),
+                                                            loss_weight))
+                setattr(self, loss_name, loss_weight)
+                self.loss_weights[task_name] = getattr(self, loss_name)
+            else:
+                self.loss_weights[task_name] = task[LOSS_REG_KEY]
+    
+    def _initialize_graph(self):
         self.g = nx.DiGraph()
         self.g.add_node('root')
         self._build_graph()
-
-        self.losses = {task[NAME_KEY]: task[LOSS_KEY] for task in task_layers if
-                      LOSS_KEY in task.keys()}
-        self.loss_weights = {task[NAME_KEY]: task[LOSS_REG_KEY] for task in
-                             task_layers if LOSS_REG_KEY in task.keys()}
 
     def _bfs_forward(self, start_node):
         ''' Here we iteratore through the graph in a BFS-fashion starting from
@@ -84,10 +124,6 @@ class MTLModel(nn.Module):
             loss_weights.append(self.loss_weights[t])
         return losses, loss_weights
 
-    def forward(self, input):
-        self.outputs = {'root': input}
-        return self._bfs_forward('root')
-
     def _build_graph(self):
         for layer in self.task_layers:
             self._add_layer(layer)
@@ -125,3 +161,8 @@ class MTLModel(nn.Module):
         layer_modules = layer[LAYER_KEY]
         layer_name_main = layer[NAME_KEY]
         setattr(self, layer_name_main, layer_modules)
+
+    def forward(self, input):
+        self.outputs = {'root': input}
+        return self._bfs_forward('root')
+

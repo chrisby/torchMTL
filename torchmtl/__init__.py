@@ -4,4 +4,4 @@ from .model_builder import MTLModel
 
 __all__ = (MTLModel)
 
-__version__ = '0.1.2'
+__version__ = '0.1.5'
