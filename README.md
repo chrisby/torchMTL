@@ -1,4 +1,4 @@
-![torchMTL Logo](https://github.com/chrisby/torchMTL/blob/main/torchmtl_logo.png "torchMTL Logo")    
+![torchMTL Logo](https://github.com/chrisby/torchMTL/blob/main/images/torchmtl_logo.png "torchMTL Logo")    
 A lightweight module for Multi-Task Learning in pytorch.
 
 `torchmtl` tries to help you composing modular multi-task architectures with minimal effort. All you need is a list of dictionaries in which you define your layers and how they build on each other. From this, `torchmtl` constructs a meta-computation graph which is executed in each forward pass of the created `MTLModel`. To combine outputs from multiple layers, simple [wrapper functions](https://github.com/chrisby/torchMTL/blob/main/torchmtl/wrapping_layers.py) are provided.
@@ -11,7 +11,7 @@ pip install torchmtl
 
 ### Quickstart
 Assume you want to train a network on three tasks as shown below.  
-![example](https://github.com/chrisby/torchMTL/blob/main/example.png "example")  
+![example](https://github.com/chrisby/torchMTL/blob/main/images/example.png "example")  
 
 To construct such an architecture with `torchmtl`, you simply have to define the following list
 
@@ -75,7 +75,7 @@ import networkx as nx
 pos = nx.planar_layout(model.g)
 nx.draw(model.g, pos, font_size=14, node_color="y", node_size=450, with_labels=True)
 ```
-![graph example](https://github.com/chrisby/torchMTL/blob/main/torchmtl_graph.png "graph example")  
+![graph example](https://github.com/chrisby/torchMTL/blob/main/images/torchmtl_graph.png "graph example")  
 
 #### The training loop
 You can now enter the typical `pytorch` training loop and you will have access to everything you need to update your model:
