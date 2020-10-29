@@ -99,3 +99,24 @@ for X, y in data_loader:
     optimizer.step()
 
 ```
+
+### Details on the layer definition
+There are 6 keys that can be specified (`name` and `layers` **must** always be present).  
+`layers`: basically takes any `nn.Module` that you can think of. You can plug in a `transformer` or just a handful of fully connected layers.  
+`anchor_layer`: This defines from which other layer this layer receives its input. Take care that the respective dimensions match.  
+`loss`: The loss function you want to compute on the output of this layer (`l_funcs`).  
+`loss_weight`: The scalar with which you want to regularize the respective loss (`l_weights`). If set to `'auto'`, a `nn.Parameter` is retured which will be updated through backpropagation.  
+`loss_init_val`: Only needed if `loss_weight='auto'`. The initialization value of the `loss_weight` parameter.
+
+### Wrapping functions
+Nodes of the **meta-computation graph** don't have to be pytorch Modules. They can be *concatentation* functions or indexing functions that return a certain element of the input. If your `X` consists of two types of input data `X=[X_1, X_2]`, you can use the `SimpleSelect` layer to select the `X_1` by setting  
+```python
+from torchmtl.wrapping_layers import SimpleSelect
+{ ...,
+  'layers' = SimpleSelect(seleciton_axis=0),
+  ...
+}
+```
+It should be trivial to write your own wrapping layers, but I try to provide useful ones with this library. If you have any layers in mind but no time to implement them, feel free to [open an issue](https://github.com/chrisby/torchMTL/issues).
+
+Logo credits and license: I reused and remixed (moved the dot and rotted the resulting logo a couple times) the pytorch logo from [here](https://github.com/pytorch/pytorch/blob/master/docs/source/_static/img/pytorch-logo-dark.png) (accessed through [wikimedia commons](https://commons.wikimedia.org/wiki/File:Pytorch_logo.png)) which can be used under the [Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/deed.en) license. Hence, this logo falls under the same license. 
