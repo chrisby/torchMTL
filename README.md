@@ -11,7 +11,7 @@ pip install torchmtl
 
 ### Quickstart
 Assume you want to train a network on three tasks as shown below.  
-![alt text](https://github.com/chrisby/torchMTL/blob/main/example.png "example")  
+![example](https://github.com/chrisby/torchMTL/blob/main/example.png "example")  
 
 To construct such an architecture with `torchmtl`, you simply have to define the following list
 
@@ -62,3 +62,16 @@ tasks = [
         }
     ]
 ```
+
+You can build your final model with the following lines in which you specify from which layers you would like to receive the output.
+```python
+from torchmtl import MTLModel
+model = MTLModel(tasks, output_tasks=['Task1', 'Task2', 'Task3'])
+```
+
+This constructs a `meta-computation graph` which is executed in each forward pass of your `model`. You can verify whether the graph was properly built by plotting it using the `networkx` library:
+```python
+pos = nx.planar_layout(model.g)
+nx.draw(model.g, pos, font_size=14, node_color="y", node_size=450, with_labels=True)
+```
+![graph example](https://github.com/chrisby/torchMTL/blob/main/torchmtl_graph.png "graph example")  
