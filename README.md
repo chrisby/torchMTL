@@ -69,9 +69,33 @@ from torchmtl import MTLModel
 model = MTLModel(tasks, output_tasks=['Task1', 'Task2', 'Task3'])
 ```
 
-This constructs a `meta-computation graph` which is executed in each forward pass of your `model`. You can verify whether the graph was properly built by plotting it using the `networkx` library:
+This constructs a **meta-computation graph** which is executed in each forward pass of your `model`. You can verify whether the graph was properly built by plotting it using the `networkx` library:
 ```python
+import networkx as nx
 pos = nx.planar_layout(model.g)
 nx.draw(model.g, pos, font_size=14, node_color="y", node_size=450, with_labels=True)
 ```
 ![graph example](https://github.com/chrisby/torchMTL/blob/main/torchmtl_graph.png "graph example")  
+
+#### The training loop
+You can now enter the typical `pytorch` training loop and you will have access to everything you need to update your model:
+```python
+for X, y in data_loader:
+    optimizer.zero_grad()
+
+    # Our model will return a list of predictions,
+    # loss functions, and regularization parameters (as defined in the tasks variable)
+    y_hat, l_funcs, l_weights = model(X)
+    
+    loss = None
+    # We can now iterate over the tasks and accumulate the losses
+    for i in range(len(y_hat)):
+        if not loss:
+            loss = l_weights[i] * l_funcs[i](y_hat[i], y[i])
+        else:
+            loss += l_weights[i] * l_funcs[i](y_hat[i], y[i])
+    
+    loss.backward()
+    optimizer.step()
+
+```
