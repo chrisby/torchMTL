@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "torchmtl"
-version = "0.1.5"
+version = "0.1.6"
 description = "A lightweight module for Multi-Task Learning in pytorch"
 authors = ["Christian Bock <christian.bock@bsse.ethz.ch>"]
 license = "MIT"
