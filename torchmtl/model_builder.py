@@ -102,10 +102,27 @@ class MTLModel(nn.Module):
                     l = copy(input_nodes)
                     print(f"Feeding output from {list(l)} into {node}")
                 cur_layer = getattr(self, node)
-                output_pre_layers = [self.outputs[n] for n in input_nodes]
-                cur_output = cur_layer(*output_pre_layers)
 
-                if node not in self.outputs.keys():
+                # Get the output from the layers that serve as input
+                output_pre_layers = []
+                output_complete = True
+                for n in input_nodes:
+                    # If an output is not ready yet, because that node has not
+                    # been computed, we put the current node back into the queue
+                    if n not in self.outputs.keys():
+                        if logging.getLogger().level == logging.DEBUG:
+                            print(f"No output for layer {n} yet")
+                        output_complete = False
+                        break
+                    else:
+                        output_pre_layers.append(self.outputs[n])
+
+                if not output_complete:
+                    if logging.getLogger().level == logging.DEBUG:
+                        print(f"Putting {node} back into the queue.")
+                    queue.append(node)
+                else:
+                    cur_output = cur_layer(*output_pre_layers)
                     self.outputs[node] = cur_output
 
             for i in self.g.successors(node):
