@@ -113,7 +113,7 @@ Nodes of the **meta-computation graph** don't have to be pytorch Modules. They c
 ```python
 from torchmtl.wrapping_layers import SimpleSelect
 { ...,
-  'layers' = SimpleSelect(seleciton_axis=0),
+  'layers' = SimpleSelect(selection_axis=0),
   ...
 }
 ```
