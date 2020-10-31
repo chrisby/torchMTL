@@ -110,10 +110,10 @@ Basically takes any `nn.Module` that you can think of. You can plug in a transfo
 This defines from which other layer this layer receives its input. Take care that the respective dimensions match.  
 
 **`loss`**  
-The loss function you want to compute on the output of this layer (`l_funcs`).  
+The loss function you want to compute on the output of this layer (`l_funcs`). Can be set to `None` or omitted altogether when only access to the layer's output is needed.   
 
 **`loss_weight`**  
-The scalar with which you want to regularize the respective loss (`l_weights`). If set to `'auto'`, a `nn.Parameter` is returned which will be updated through backpropagation.  
+The scalar with which you want to regularize the respective loss (`l_weights`). If set to `'auto'`, a `nn.Parameter` is returned which will be updated through backpropagation. Can be set to `None` or omitted altogether when only access to the layer's output is needed.  
 
 **`loss_init_val`**  
 Only needed if `loss_weight: 'auto'`. The initialization value of the `loss_weight` parameter.
