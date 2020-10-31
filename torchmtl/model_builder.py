@@ -130,15 +130,15 @@ class MTLModel(nn.Module):
                     queue.append(i)
                     visited[i] = True
 
-        losses, loss_weights = self._get_losses() 
+        losses, loss_weights = self._get_losses()
         return [self.outputs[t] for t in self.output_tasks], losses, loss_weights
 
     def _get_losses(self):
         losses = []
         loss_weights = []
         for t in self.output_tasks:
-            losses.append(self.losses[t])
-            loss_weights.append(self.loss_weights[t])
+            losses.append(self.losses.get(t))
+            loss_weights.append(self.loss_weights.get(t))
         return losses, loss_weights
 
     def _build_graph(self):
