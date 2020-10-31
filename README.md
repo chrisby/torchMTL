@@ -83,7 +83,7 @@ You can now enter the typical `pytorch` training loop and you will have access t
 for X, y in data_loader:
     optimizer.zero_grad()
 
-    # Our model will return a list of predictions,
+    # Our model will return a list of predictions (from the layers specified in `output_tasks`),
     # loss functions, and regularization parameters (as defined in the tasks variable)
     y_hat, l_funcs, l_weights = model(X)
     
