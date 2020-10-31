@@ -101,12 +101,22 @@ for X, y in data_loader:
 ```
 
 ### Details on the layer definition
-There are 6 keys that can be specified (`name` and `layers` **must** always be present).  
-`layers`: basically takes any `nn.Module` that you can think of. You can plug in a `transformer` or just a handful of fully connected layers.  
-`anchor_layer`: This defines from which other layer this layer receives its input. Take care that the respective dimensions match.  
-`loss`: The loss function you want to compute on the output of this layer (`l_funcs`). Can be `None`. If you simply want to access the layer's output, you can set it to `None` or don't specify at all.  
-`loss_weight`: The scalar with which you want to regularize the respective loss (`l_weights`). If set to `'auto'`, a `nn.Parameter` is returned which will be updated through backprop. Like the `loss` key, you may omit this in your layer specification (or set to `None`) if only the output of the layers are relevant for you.  
-`loss_init_val`: Only needed if `loss_weight='auto'`. The initialization value of the `loss_weight` parameter.
+There are 6 keys that can be specified (`name` and `layers` **must** always be present):  
+
+**`layers`**  
+Basically takes any `nn.Module` that you can think of. You can plug in a transformer or just a handful of fully connected layers.  
+
+**`anchor_layer`**  
+This defines from which other layer this layer receives its input. Take care that the respective dimensions match.  
+
+**`loss`**  
+The loss function you want to compute on the output of this layer (`l_funcs`).  
+
+**`loss_weight`**  
+The scalar with which you want to regularize the respective loss (`l_weights`). If set to `'auto'`, a `nn.Parameter` is returned which will be updated through backpropagation.  
+
+**`loss_init_val`**  
+Only needed if `loss_weight: 'auto'`. The initialization value of the `loss_weight` parameter.
 
 ### Wrapping functions
 Nodes of the **meta-computation graph** don't have to be pytorch Modules. They can be *concatenation* functions or indexing functions that return a certain element of the input. If your `X` consists of two types of input data `X=[X_1, X_2]`, you can use the `SimpleSelect` layer to select the `X_1` by setting  
