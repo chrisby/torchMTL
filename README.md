@@ -87,13 +87,10 @@ for X, y in data_loader:
     # loss functions, and regularization parameters (as defined in the tasks variable)
     y_hat, l_funcs, l_weights = model(X)
     
-    loss = None
+    loss = 0
     # We can now iterate over the tasks and accumulate the losses
     for i in range(len(y_hat)):
-        if not loss:
-            loss = l_weights[i] * l_funcs[i](y_hat[i], y[i])
-        else:
-            loss += l_weights[i] * l_funcs[i](y_hat[i], y[i])
+        loss += l_weights[i] * l_funcs[i](y_hat[i], y[i])
     
     loss.backward()
     optimizer.step()
