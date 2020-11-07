@@ -83,17 +83,14 @@ You can now enter the typical `pytorch` training loop and you will have access t
 for X, y in data_loader:
     optimizer.zero_grad()
 
-    # Our model will return a list of predictions,
+    # Our model will return a list of predictions (from the layers specified in `output_tasks`),
     # loss functions, and regularization parameters (as defined in the tasks variable)
     y_hat, l_funcs, l_weights = model(X)
     
-    loss = None
+    loss = 0
     # We can now iterate over the tasks and accumulate the losses
     for i in range(len(y_hat)):
-        if not loss:
-            loss = l_weights[i] * l_funcs[i](y_hat[i], y[i])
-        else:
-            loss += l_weights[i] * l_funcs[i](y_hat[i], y[i])
+        loss += l_weights[i] * l_funcs[i](y_hat[i], y[i])
     
     loss.backward()
     optimizer.step()
@@ -110,10 +107,10 @@ Basically takes any `nn.Module` that you can think of. You can plug in a transfo
 This defines from which other layer this layer receives its input. Take care that the respective dimensions match.  
 
 **`loss`**  
-The loss function you want to compute on the output of this layer (`l_funcs`).  
+The loss function you want to compute on the output of this layer (`l_funcs`). Can be set to `None` or omitted altogether when only access to the layer's output is needed.   
 
 **`loss_weight`**  
-The scalar with which you want to regularize the respective loss (`l_weights`). If set to `'auto'`, a `nn.Parameter` is returned which will be updated through backpropagation.  
+The scalar with which you want to regularize the respective loss (`l_weights`). If set to `'auto'`, a `nn.Parameter` is returned which will be updated through backpropagation. Can be set to `None` or omitted altogether when only access to the layer's output is needed.  
 
 **`loss_init_val`**  
 Only needed if `loss_weight: 'auto'`. The initialization value of the `loss_weight` parameter.
