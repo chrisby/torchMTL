@@ -106,12 +106,9 @@ class TestGraphExecution:
             optimizer.zero_grad()
             y_hat, l_funcs, l_weights = model(X)
     
-            loss = None
+            loss = 0
             for i in range(len(y)):
-                if not loss:
-                    loss = l_weights[i] * l_funcs[i](y_hat[i], y[i])
-                else:
-                    loss += l_weights[i] * l_funcs[i](y_hat[i], y[i])
+                loss += l_weights[i] * l_funcs[i](y_hat[i], y[i])
 
             loss.backward()
             optimizer.step()
