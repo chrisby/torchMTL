@@ -9,7 +9,7 @@ A lightweight module for Multi-Task Learning in pytorch.
 pip install torchmtl
 ```
 
-### Quickstart
+### Quickstart (or find examples [here](https://github.com/chrisby/torchMTL/tree/main/examples))
 Assume you want to train a network on three tasks as shown below.  
 ![example](https://github.com/chrisby/torchMTL/blob/main/images/example.png "example")  
 
