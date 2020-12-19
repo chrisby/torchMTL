@@ -129,6 +129,15 @@ from torchmtl.wrapping_layers import SimpleSelect
 ```
 It should be trivial to write your own wrapping layers, but I try to provide useful ones with this library. If you have any layers in mind but no time to implement them, feel free to [open an issue](https://github.com/chrisby/torchMTL/issues).
 
+#### Cite
+```
+@misc{torchMTL,
+  author = {Bock, Christian},
+  doi = {10.5281/zenodo.4362515},
+  url = {https://github.com/chrisby/torchMTL},
+  year = {2020}
+}
+```
 
 #### Credits
 Logo credits and license: I reused and remixed (moved the dot and rotated the resulting logo a couple times) the pytorch logo from [here](https://github.com/pytorch/pytorch/blob/master/docs/source/_static/img/pytorch-logo-dark.png) (accessed through [wikimedia commons](https://commons.wikimedia.org/wiki/File:Pytorch_logo.png)) which can be used under the [Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/deed.en) license. Hence, this logo falls under the same license. 
