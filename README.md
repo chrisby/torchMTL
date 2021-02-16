@@ -131,7 +131,7 @@ It should be trivial to write your own wrapping layers, but I try to provide use
 
 #### Cite
 ```
-@misc{torchMTL,
+@misc{torchMTL: A lightweight module for Multi-Task Learning in pytorch.,
   author = {Bock, Christian},
   doi = {10.5281/zenodo.4362515},
   url = {https://github.com/chrisby/torchMTL},
