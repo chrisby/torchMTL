@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "torchmtl"
-version = "0.1.8"
+version = "0.1.9"
 description = "A lightweight module for Multi-Task Learning in pytorch"
 authors = ["Christian Bock <christian.bock@bsse.ethz.ch>"]
 license = "MIT"
@@ -8,7 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-torch = "^1.6.0"
+torch = ">=1.6.0"
 networkx = "^2.5"
 matplotlib = "^3.3.2"
 scipy = "^1.5.3"
